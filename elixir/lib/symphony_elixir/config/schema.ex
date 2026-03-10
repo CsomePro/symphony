@@ -45,6 +45,9 @@ defmodule SymphonyElixir.Config.Schema do
     embedded_schema do
       field(:kind, :string)
       field(:endpoint, :string, default: "https://api.linear.app/graphql")
+      field(:base_url, :string)
+      field(:workspace_slug, :string)
+      field(:project_id, :string)
       field(:api_key, :string)
       field(:project_slug, :string)
       field(:assignee, :string)
@@ -57,7 +60,18 @@ defmodule SymphonyElixir.Config.Schema do
       schema
       |> cast(
         attrs,
-        [:kind, :endpoint, :api_key, :project_slug, :assignee, :active_states, :terminal_states],
+        [
+          :kind,
+          :endpoint,
+          :base_url,
+          :workspace_slug,
+          :project_id,
+          :api_key,
+          :project_slug,
+          :assignee,
+          :active_states,
+          :terminal_states
+        ],
         empty_values: []
       )
     end
@@ -328,7 +342,7 @@ defmodule SymphonyElixir.Config.Schema do
   defp finalize_settings(settings) do
     tracker = %{
       settings.tracker
-      | api_key: resolve_secret_setting(settings.tracker.api_key, System.get_env("LINEAR_API_KEY")),
+      | api_key: resolve_secret_setting(settings.tracker.api_key, tracker_api_key_fallback(settings.tracker.kind)),
         assignee: resolve_secret_setting(settings.tracker.assignee, System.get_env("LINEAR_ASSIGNEE"))
     }
 
@@ -438,6 +452,9 @@ defmodule SymphonyElixir.Config.Schema do
   end
 
   defp normalize_secret_value(_value), do: nil
+
+  defp tracker_api_key_fallback("plane"), do: System.get_env("PLANE_API_KEY")
+  defp tracker_api_key_fallback(_kind), do: System.get_env("LINEAR_API_KEY")
 
   defp default_turn_sandbox_policy(workspace) do
     writable_root =
