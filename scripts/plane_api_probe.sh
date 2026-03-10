@@ -341,7 +341,7 @@ probe_work_item_detail() {
   require_value "PLANE_WORK_ITEM_ID" "$WORK_ITEM_ID" || return 1
   request_json "GET" "$(base_api_url)$path"
   local identifier
-  identifier=$(first_present '.identifier')
+  identifier=$(first_present '.identifier // .sequence_id // .issue_identifier // .display_id')
   record_live_http_result "work_item_detail" "GET ${path} returned ${LAST_HTTP_STATUS}; identifier=${identifier:-unknown}" "GET ${path} failed"
 }
 

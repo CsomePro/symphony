@@ -64,14 +64,20 @@ Reference pages:
 - `https://developers.plane.so/api-reference/issue-comment/add-issue-comment`
 - `https://developers.plane.so/api-reference/issue-comment/update-issue-comment-detail`
 
-Observed documentation difference to verify in CE:
+## Observed CE behavior
 
-- Official docs describe list pagination with `limit` and `offset`.
-- Ticket `CSO-65` requires explicit verification of `per_page` and `cursor` behavior.
-- The probe script therefore tests both forms and reports whether CE supports, ignores, or rejects `per_page`/`cursor`.
+- `X-API-Key` auth succeeds for every ticket-scoped endpoint.
+- CE accepts both `limit`/`offset` and `per_page`/`cursor` on the work-items list.
+- Cursor pagination metadata is returned as `next_cursor` / `prev_cursor`; a `per_page=2` follow-up with `cursor=2:1:0` returns `200` and an empty `results` array for a single-item dataset.
+- `expand=state,labels` hydrates `state` as an object and `labels` as an array.
+- Work-item detail returns `sequence_id` rather than `identifier`; the probe falls back accordingly in its summary output.
+- Work-item lookup by identifier still succeeds via `GET /workspaces/{slug}/work-items/{identifier}/`.
+- No blocking CE-vs-doc differences were observed for this ticket scope.
 
 ## Validation record for this session
 
 - 2026-03-10: repository baseline confirmed there was no existing Plane probe script or documented results.
-- 2026-03-10: local environment had no `PLANE_*` variables set, so live Plane CE execution could not be completed in this session.
-- 2026-03-10: dry-run coverage and report generation are the only completed validations so far.
+- 2026-03-10: dry-run coverage and report generation passed via `bash -n`, `--help`, and `--dry-run --output`.
+- 2026-03-10: live read-only probe passed for auth, projects, states, work-items list, work-item detail, identifier lookup, pagination, and `expand=state,labels`.
+- 2026-03-10: live mutation probe passed for work-item state update plus comment create/update.
+- 2026-03-10: official docs focus on `limit`/`offset`, while the target CE instance also accepts `per_page`/`cursor` and returns cursor metadata as `next_cursor` / `prev_cursor`.

@@ -1,27 +1,27 @@
 # Plane API Probe Report
 
-- Generated at: 2026-03-10T18:15:42Z
-- Mode: dry-run
-- Overall: DRY-RUN
-- Mutations: disabled
-- Workspace slug: <unset>
-- Project id: <unset>
-- Work item id: <unset>
-- Work item identifier: <unset>
+- Generated at: 2026-03-10T18:55:12Z
+- Mode: live
+- Overall: PASS
+- Mutations: enabled
+- Workspace slug: hunter
+- Project id: a10cc158-43eb-40a6-b14f-36f23aad612f
+- Work item id: fa9a927c-1271-4fde-ab84-de104416dc95
+- Work item identifier: VULNERABLE-1
 
 ## Results
-- DRY-RUN `auth`: would send GET /workspaces/<workspace-slug>/projects/ with X-API-Key header; verifies X-API-Key authentication via an authenticated list request
-- DRY-RUN `projects`: would send GET /workspaces/<workspace-slug>/projects/ with X-API-Key header
-- DRY-RUN `states`: would send GET /workspaces/<workspace-slug>/projects/<project-id>/states/ with X-API-Key header
-- DRY-RUN `work_items`: would send GET /workspaces/<workspace-slug>/projects/<project-id>/work-items/ with X-API-Key header
-- DRY-RUN `work_item_detail`: would send GET /workspaces/<workspace-slug>/projects/<project-id>/work-items/<work-item-id>/ with X-API-Key header
-- DRY-RUN `work_item_identifier`: would send GET /workspaces/<workspace-slug>/work-items/<identifier>/ with X-API-Key header
-- DRY-RUN `pagination`: would send GET /workspaces/<workspace-slug>/projects/<project-id>/work-items/?limit=2&offset=0 with X-API-Key header; official docs baseline
-- DRY-RUN `pagination`: would send GET /workspaces/<workspace-slug>/projects/<project-id>/work-items/?per_page=2 with X-API-Key header; CE divergence probe for per_page/cursor
-- DRY-RUN `expand`: would send GET /workspaces/<workspace-slug>/projects/<project-id>/work-items/<work-item-id>/?expand=state,labels with X-API-Key header; checks expand=state,labels
-- DRY-RUN `update_state`: would send PATCH /workspaces/<workspace-slug>/projects/<project-id>/work-items/<work-item-id>/ with X-API-Key header; no-op PATCH when target state is omitted; body={"state":"<uuid>"}
-- DRY-RUN `create_comment`: would send POST /workspaces/<workspace-slug>/projects/<project-id>/work-items/<work-item-id>/comments/ with X-API-Key header; creates a probe comment; body={"comment_html":"..."}
-- DRY-RUN `update_comment`: would send PATCH /workspaces/<workspace-slug>/projects/<project-id>/work-items/<work-item-id>/comments/<comment-id>/ with X-API-Key header; updates a probe comment or existing comment id; body={"comment_html":"..."}
+- PASS `projects`: GET /workspaces/hunter/projects/ returned 200; count=1
+- PASS `auth`: Authenticated request accepted using X-API-Key header; status=200
+- PASS `states`: GET /workspaces/hunter/projects/a10cc158-43eb-40a6-b14f-36f23aad612f/states/ returned 200; count=8
+- PASS `work_items`: GET /workspaces/hunter/projects/a10cc158-43eb-40a6-b14f-36f23aad612f/work-items/ returned 200; count=1
+- PASS `work_item_detail`: GET /workspaces/hunter/projects/a10cc158-43eb-40a6-b14f-36f23aad612f/work-items/fa9a927c-1271-4fde-ab84-de104416dc95/ returned 200; identifier=1
+- PASS `work_item_identifier`: GET /workspaces/hunter/work-items/VULNERABLE-1/ returned 200; id=fa9a927c-1271-4fde-ab84-de104416dc95
+- PASS `pagination`: limit/offset request returned 200; count=1
+- PASS `pagination`: per_page/cursor request returned 200; cursor=2:1:0
+- PASS `expand`: expand=state,labels returned 200; state=object; labels=array
+- PASS `update_state`: PATCH /workspaces/hunter/projects/a10cc158-43eb-40a6-b14f-36f23aad612f/work-items/fa9a927c-1271-4fde-ab84-de104416dc95/ returned 200; state=922a6600-a05a-4e54-a27d-1049567e1dae
+- PASS `create_comment`: POST /workspaces/hunter/projects/a10cc158-43eb-40a6-b14f-36f23aad612f/work-items/fa9a927c-1271-4fde-ab84-de104416dc95/comments/ returned 201; comment_id=17b8989c-5a9c-44a0-ac9c-f2df44be95be
+- PASS `update_comment`: PATCH /workspaces/hunter/projects/a10cc158-43eb-40a6-b14f-36f23aad612f/work-items/fa9a927c-1271-4fde-ab84-de104416dc95/comments/17b8989c-5a9c-44a0-ac9c-f2df44be95be/ returned 200
 
 ## Documentation Baseline
 
@@ -48,4 +48,4 @@
 
 ## Notes
 
-- Dry-run mode does not require Plane credentials; it validates request coverage and report formatting only.
+- Live mode executes real HTTP requests against Plane using X-API-Key authentication.
