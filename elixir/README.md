@@ -110,6 +110,8 @@ Title: {{ issue.title }} Body: {{ issue.description }}
 Notes:
 
 - If a value is missing, defaults are used.
+- `tracker.kind` supports `linear`, `memory`, and `plane`.
+- `plane` configs use `tracker.base_url`, `tracker.workspace_slug`, `tracker.project_id`, and `tracker.api_key` instead of Linear's `project_slug`.
 - Safer Codex defaults are used when policy fields are omitted:
   - `codex.approval_policy` defaults to `{"reject":{"sandbox_approval":true,"rules":true,"mcp_elicitations":true}}`
   - `codex.thread_sandbox` defaults to `workspace-write`
@@ -127,11 +129,21 @@ Notes:
   `git clone ... .` there, along with any other setup commands you need.
 - If a hook needs `mise exec` inside a freshly cloned workspace, trust the repo config and fetch
   the project dependencies in `hooks.after_create` before invoking `mise` later from other hooks.
-- `tracker.api_key` reads from `LINEAR_API_KEY` when unset or when value is `$LINEAR_API_KEY`.
+- `tracker.api_key` reads from `LINEAR_API_KEY` for `linear` and `PLANE_API_KEY` for `plane` when unset.
+- Any secret/path field that contains `$VAR` resolves from the environment, including `tracker.api_key: $PLANE_API_KEY`.
 - For path values, `~` is expanded to the home directory.
 - For env-backed path values, use `$VAR`. `workspace.root` resolves `$VAR` before path handling,
   while `codex.command` stays a shell command string and any `$VAR` expansion there happens in the
   launched shell.
+
+```yaml
+tracker:
+  kind: plane
+  base_url: "https://plane.example.com"
+  workspace_slug: "your-workspace"
+  project_id: "your-project-id"
+  api_key: $PLANE_API_KEY
+```
 
 ```yaml
 tracker:

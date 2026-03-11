@@ -94,6 +94,9 @@ defmodule SymphonyElixir.TestSupport do
         [
           tracker_kind: "linear",
           tracker_endpoint: "https://api.linear.app/graphql",
+          tracker_base_url: nil,
+          tracker_workspace_slug: nil,
+          tracker_project_id: nil,
           tracker_api_token: "token",
           tracker_project_slug: "project",
           tracker_assignee: nil,
@@ -129,6 +132,9 @@ defmodule SymphonyElixir.TestSupport do
 
     tracker_kind = Keyword.get(config, :tracker_kind)
     tracker_endpoint = Keyword.get(config, :tracker_endpoint)
+    tracker_base_url = Keyword.get(config, :tracker_base_url)
+    tracker_workspace_slug = Keyword.get(config, :tracker_workspace_slug)
+    tracker_project_id = Keyword.get(config, :tracker_project_id)
     tracker_api_token = Keyword.get(config, :tracker_api_token)
     tracker_project_slug = Keyword.get(config, :tracker_project_slug)
     tracker_assignee = Keyword.get(config, :tracker_assignee)
@@ -165,6 +171,9 @@ defmodule SymphonyElixir.TestSupport do
         "tracker:",
         "  kind: #{yaml_value(tracker_kind)}",
         "  endpoint: #{yaml_value(tracker_endpoint)}",
+        "  base_url: #{yaml_value(tracker_base_url)}",
+        "  workspace_slug: #{yaml_value(tracker_workspace_slug)}",
+        "  project_id: #{yaml_value(tracker_project_id)}",
         "  api_key: #{yaml_value(tracker_api_token)}",
         "  project_slug: #{yaml_value(tracker_project_slug)}",
         "  assignee: #{yaml_value(tracker_assignee)}",

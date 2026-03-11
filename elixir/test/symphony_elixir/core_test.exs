@@ -88,6 +88,83 @@ defmodule SymphonyElixir.CoreTest do
     assert {:error, {:unsupported_tracker_kind, "123"}} = Config.validate!()
   end
 
+  test "plane config validates required fields by kind" do
+    previous_plane_api_key = System.get_env("PLANE_API_KEY")
+    on_exit(fn -> restore_env("PLANE_API_KEY", previous_plane_api_key) end)
+    System.delete_env("PLANE_API_KEY")
+
+    write_workflow_file!(Workflow.workflow_file_path(),
+      tracker_kind: "plane",
+      tracker_endpoint: nil,
+      tracker_api_token: nil,
+      tracker_project_slug: nil,
+      tracker_base_url: nil,
+      tracker_workspace_slug: nil,
+      tracker_project_id: nil
+    )
+
+    assert {:error, :missing_plane_base_url} = Config.validate!()
+
+    write_workflow_file!(Workflow.workflow_file_path(),
+      tracker_kind: "plane",
+      tracker_endpoint: nil,
+      tracker_api_token: nil,
+      tracker_project_slug: nil,
+      tracker_base_url: "https://plane.example.test",
+      tracker_workspace_slug: nil,
+      tracker_project_id: nil
+    )
+
+    assert {:error, :missing_plane_workspace_slug} = Config.validate!()
+
+    write_workflow_file!(Workflow.workflow_file_path(),
+      tracker_kind: "plane",
+      tracker_endpoint: nil,
+      tracker_api_token: nil,
+      tracker_project_slug: nil,
+      tracker_base_url: "https://plane.example.test",
+      tracker_workspace_slug: "demo-workspace",
+      tracker_project_id: nil
+    )
+
+    assert {:error, :missing_plane_project_id} = Config.validate!()
+
+    write_workflow_file!(Workflow.workflow_file_path(),
+      tracker_kind: "plane",
+      tracker_endpoint: nil,
+      tracker_api_token: nil,
+      tracker_project_slug: nil,
+      tracker_base_url: "https://plane.example.test",
+      tracker_workspace_slug: "demo-workspace",
+      tracker_project_id: "project-123"
+    )
+
+    assert {:error, :missing_plane_api_token} = Config.validate!()
+  end
+
+  test "plane config passes with complete tracker settings" do
+    write_workflow_file!(Workflow.workflow_file_path(),
+      tracker_kind: "plane",
+      tracker_endpoint: nil,
+      tracker_project_slug: nil,
+      tracker_base_url: "https://plane.example.test",
+      tracker_workspace_slug: "demo-workspace",
+      tracker_project_id: "project-123",
+      tracker_api_token: "plane-token"
+    )
+
+    assert :ok = Config.validate!()
+
+    tracker = Config.settings!().tracker
+    assert tracker.kind == "plane"
+    assert tracker.base_url == "https://plane.example.test"
+    assert tracker.workspace_slug == "demo-workspace"
+    assert tracker.project_id == "project-123"
+    assert tracker.api_key == "plane-token"
+    assert tracker.project_slug == nil
+    assert tracker.endpoint == "https://api.linear.app/graphql"
+  end
+
   test "current WORKFLOW.md file is valid and complete" do
     original_workflow_path = Workflow.workflow_file_path()
     on_exit(fn -> Workflow.set_workflow_file_path(original_workflow_path) end)
@@ -130,6 +207,54 @@ defmodule SymphonyElixir.CoreTest do
 
     assert Config.settings!().tracker.api_key == env_api_key
     assert Config.settings!().tracker.project_slug == "project"
+    assert :ok = Config.validate!()
+  end
+
+  test "plane api token resolves from PLANE_API_KEY env var" do
+    previous_plane_api_key = System.get_env("PLANE_API_KEY")
+    env_api_key = "test-plane-api-key"
+
+    on_exit(fn -> restore_env("PLANE_API_KEY", previous_plane_api_key) end)
+    System.put_env("PLANE_API_KEY", env_api_key)
+
+    write_workflow_file!(Workflow.workflow_file_path(),
+      tracker_kind: "plane",
+      tracker_endpoint: nil,
+      tracker_api_token: nil,
+      tracker_project_slug: nil,
+      tracker_base_url: "https://plane.example.test",
+      tracker_workspace_slug: "demo-workspace",
+      tracker_project_id: "project-123",
+      codex_command: "/bin/sh app-server"
+    )
+
+    tracker = Config.settings!().tracker
+    assert tracker.api_key == env_api_key
+    assert tracker.base_url == "https://plane.example.test"
+    assert tracker.workspace_slug == "demo-workspace"
+    assert tracker.project_id == "project-123"
+    assert :ok = Config.validate!()
+  end
+
+  test "plane config resolves explicit $PLANE_API_KEY references" do
+    previous_plane_api_key = System.get_env("PLANE_API_KEY")
+    env_api_key = "test-plane-api-key-ref"
+
+    on_exit(fn -> restore_env("PLANE_API_KEY", previous_plane_api_key) end)
+    System.put_env("PLANE_API_KEY", env_api_key)
+
+    write_workflow_file!(Workflow.workflow_file_path(),
+      tracker_kind: "plane",
+      tracker_endpoint: nil,
+      tracker_api_token: "$PLANE_API_KEY",
+      tracker_project_slug: nil,
+      tracker_base_url: "https://plane.example.test",
+      tracker_workspace_slug: "demo-workspace",
+      tracker_project_id: "project-123",
+      codex_command: "/bin/sh app-server"
+    )
+
+    assert Config.settings!().tracker.api_key == env_api_key
     assert :ok = Config.validate!()
   end
 

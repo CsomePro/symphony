@@ -1,4 +1,7 @@
 ---
+# Tracker config notes:
+# - `linear` uses `project_slug` and optional `api_key` / `$LINEAR_API_KEY`.
+# - `plane` uses `base_url`, `workspace_slug`, `project_id`, and `api_key` / `$PLANE_API_KEY`.
 tracker:
   kind: linear
   project_slug: "symphony-0c79b11b75ea"
